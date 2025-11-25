@@ -18,6 +18,8 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const stories = await Story.find().populate("userId");
+    console.log(stories);
+
     res.json(stories);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

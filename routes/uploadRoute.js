@@ -1,29 +1,29 @@
 const express = require("express");
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 
 const router = express.Router();
 
-// setup multer + cloudinary storage
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "stories",
-    allowed_formats: ["jpg", "png", "jpeg"],
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// upload route
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    const imageURL = req.file.path; // URL from Cloudinary
-    res.json({ success: true, url: imageURL });
-    console.log("image uploaded successfully", imageURL);
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    // convert buffer → base64 → data URI
+    const b64 = req.file.buffer.toString("base64");
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+    // upload to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(dataURI, {
+      folder: "stories",
+      resource_type: "auto", // handles both images & videos
+    });
+
+    console.log("✅ Upload success:", uploadResult.secure_url);
+    res.status(200).json({ success: true, url: uploadResult.secure_url });
+  } catch (error) {
+    console.error("❌ Upload failed:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 

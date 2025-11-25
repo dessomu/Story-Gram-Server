@@ -2,6 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+
+require("./models/user");
+
 const uploadRoute = require("./routes/uploadRoute");
 const storyRoute = require("./routes/storyRoute");
 
