@@ -7,8 +7,15 @@ const router = express.Router();
 // Save story after uploading image
 router.post("/", auth, async (req, res) => {
   try {
-    const { userId, imageURL } = req.body;
-    await Story.create({ userId, imageURL });
+    const { userId, mediaURL, mediaType } = req.body;
+
+    if (!mediaURL || !mediaType) {
+      return res.status(400).json({ error: "mediaURL and mediaType required" });
+    }
+    const newStory = await Story.create({ userId, mediaURL, mediaType });
+
+    const io = req.app.get("io");
+    io.emit("storyAdded", newStory); // notify clients in realtime
 
     const stories = await Story.find().populate("userId");
 

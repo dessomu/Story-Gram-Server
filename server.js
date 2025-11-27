@@ -46,6 +46,6 @@ app.use("/upload", uploadRoute);
 app.use("/stories", storyRoute);
 app.use("/auth", authRoute);
 
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
   console.log(`🚀 Server running on  http://localhost:${process.env.PORT}`);
 });
