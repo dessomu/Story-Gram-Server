@@ -1,30 +1,37 @@
 const express = require("express");
-const multer = require("multer");
+const busboy = require("busboy");
 const cloudinary = require("../config/cloudinary");
 
 const router = express.Router();
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+router.post("/", (req, res) => {
+  const bb = busboy({ headers: req.headers });
 
-router.post("/", upload.single("media"), async (req, res) => {
-  try {
-    // convert buffer → base64 → data URI
-    const b64 = req.file.buffer.toString("base64");
-    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+  bb.on("file", (name, file, info) => {
+    let uploaded = 0;
+    let total = 0;
 
-    // upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(dataURI, {
-      folder: "stories",
-      resource_type: "auto", // handles both images & videos
+    file.on("data", (chunk) => {
+      uploaded += chunk.length;
+      const percentage = Math.round((uploaded / total) * 100);
+
+      if (global.sendProgress) {
+        global.sendProgress(percentage);
+      }
     });
 
-    console.log("✅ Upload success:", uploadResult.secure_url);
-    res.status(200).json({ success: true, url: uploadResult.secure_url });
-  } catch (error) {
-    console.error("❌ Upload failed:", error);
-    res.status(500).json({ success: false, message: error.message });
-  }
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { resource_type: "auto", folder: "stories" },
+      (err, result) => {
+        if (err) return res.status(500).json({ success: false });
+        return res.status(200).json({ success: true, url: result.secure_url });
+      }
+    );
+
+    file.pipe(uploadStream);
+  });
+
+  req.pipe(bb);
 });
 
 module.exports = router;
