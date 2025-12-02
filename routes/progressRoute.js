@@ -10,6 +10,9 @@ router.get("/", (req, res) => {
     res.write(`event: progress\n`);
     res.write(`data: ${percent}\n\n`);
   };
+  req.on("close", () => {
+    global.sendProgress = null;
+  });
 });
 
 module.exports = router;

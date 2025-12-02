@@ -11,6 +11,8 @@ const uploadRoute = require("./routes/uploadRoute");
 const storyRoute = require("./routes/storyRoute");
 const authRoute = require("./routes/authRoute");
 const progressRoute = require("./routes/progressRoute");
+const commentRoute = require("./routes/commentRoute");
+const likeRoute = require("./routes/likeRoute");
 
 dotenv.config();
 
@@ -47,6 +49,8 @@ app.use("/upload", uploadRoute);
 app.use("/stories", storyRoute);
 app.use("/auth", authRoute);
 app.use("/progress", progressRoute);
+app.use("/comments", commentRoute);
+app.use("/likes", likeRoute);
 
 server.listen(process.env.PORT, () => {
   console.log(`🚀 Server running on  http://localhost:${process.env.PORT}`);
