@@ -24,7 +24,11 @@ router.post("/", (req, res) => {
       { resource_type: "auto", folder: "stories" },
       (err, result) => {
         if (err) return res.status(500).json({ success: false });
-        return res.status(200).json({ success: true, url: result.secure_url });
+        return res.status(200).json({
+          success: true,
+          url: result.secure_url,
+          publicId: result.public_id,
+        });
       }
     );
 

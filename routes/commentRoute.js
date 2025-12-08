@@ -20,26 +20,38 @@ router.post("/:id/comment", auth, async (req, res) => {
 });
 
 router.get("/:id/comments", auth, async (req, res) => {
-  const comments = await Comment.find({ storyId: req.params.id })
-    .sort({ createdAt: -1 })
-    .populate("userId", "name profilePic");
+  try {
+    const comments = await Comment.find({ storyId: req.params.id })
+      .sort({ createdAt: -1 })
+      .populate("userId", "name profilePic");
 
-  res.json({ success: true, comments });
+    return res.json({ success: true, comments });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(400)
+      .json({ success: false, message: "failed to get comments" });
+  }
 });
 
 router.delete("/:storyId/comment/:commentId", auth, async (req, res) => {
-  const { storyId, commentId } = req.params;
-  const userId = req.user;
+  try {
+    const { storyId, commentId } = req.params;
+    const userId = req.user;
 
-  const deleted = await Comment.findOneAndDelete({ _id: commentId, userId });
+    const deleted = await Comment.findOneAndDelete({ _id: commentId, userId });
 
-  if (!deleted) return res.status(404).json({ message: "Not found" });
+    if (!deleted) return res.status(404).json({ message: "Not found" });
 
-  await Story.findByIdAndUpdate(storyId, { $inc: { commentCount: -1 } });
+    await Story.findByIdAndUpdate(storyId, { $inc: { commentCount: -1 } });
 
-  req.app.get("io").emit("commentDeleted", { storyId, commentId });
+    req.app.get("io").emit("commentDeleted", { storyId, commentId });
 
-  res.json({ success: true });
+    return res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    return res.json({ success: false, message: "Failed to delete comment" });
+  }
 });
 
 module.exports = router;

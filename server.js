@@ -52,6 +52,10 @@ app.use("/progress", progressRoute);
 app.use("/comments", commentRoute);
 app.use("/likes", likeRoute);
 
+app.use("/health", (req, res) => {
+  res.json({ message: "Server is healthy" });
+});
+
 server.listen(process.env.PORT, () => {
   console.log(`🚀 Server running on  http://localhost:${process.env.PORT}`);
 });

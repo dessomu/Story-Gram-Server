@@ -26,4 +26,19 @@ router.patch("/:id/like", auth, async (req, res) => {
   res.json({ success: true, likeCount });
 });
 
+router.get("/:id/likes", auth, async (req, res) => {
+  try {
+    const storyId = req.params.id;
+
+    const likes = await Like.find({ storyId }).populate(
+      "userId",
+      "name profilePic"
+    );
+
+    res.json({ success: true, likes });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

@@ -4,6 +4,7 @@ const storySchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   mediaURL: { type: String }, // instead of imageURL
   mediaType: { type: String, enum: ["image", "video"] },
+  mediaPublicId: { type: String },
   createdAt: { type: Date, default: Date.now },
   expiresAt: { type: Date, default: () => Date.now() + 24 * 60 * 60 * 1000 }, // 24h
   likeCount: { type: Number, default: 0 },
