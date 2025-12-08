@@ -22,7 +22,7 @@ const server = http.createServer(app); // NEW - wrap express in http server
 // SOCKET.IO SETUP
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5174", // frontend URL (Vite default)
+    origin: "https://nopicstorygram.netlify.app/", // frontend URL (Vite default)
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
 });
