@@ -5,18 +5,30 @@ const auth = require("../middleware/auth");
 const router = express.Router();
 
 router.post("/:id/comment", auth, async (req, res) => {
-  const { text } = req.body;
-  const storyId = req.params.id;
-  const userId = req.user;
+  try {
+    const { text } = req.body;
+    const storyId = req.params.id;
+    const userId = req.user;
 
-  const newComment = await Comment.create({ storyId, userId, text });
-  await Story.findByIdAndUpdate(storyId, { $inc: { commentCount: 1 } });
+    if (!text?.trim()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment text required" });
+    }
 
-  const populated = await newComment.populate("userId", "name profilePic");
+    const newComment = await Comment.create({ storyId, userId, text });
 
-  req.app.get("io").emit("commentAdded", { storyId, comment: populated });
+    await Story.findByIdAndUpdate(storyId, { $inc: { commentCount: 1 } });
 
-  res.json({ success: true, comment: populated });
+    const populated = await newComment.populate("userId", "name profilePic");
+
+    req.app.get("io").emit("commentAdded", { storyId, comment: populated });
+
+    return res.status(201).json({ success: true, comment: populated });
+  } catch (err) {
+    console.error("❌ Error posting comment:", err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 router.get("/:id/comments", auth, async (req, res) => {
